@@ -23,28 +23,28 @@ class CropCalendarScreen extends StatelessWidget {
   const CropCalendarScreen({super.key});
 
   static const List<CropData> _detailedData = [
-    // Assam
-    CropData('Assam', 'Banana', {
+    // -
+    CropData('-', 'Banana', {
       0: [TimelineBlock(h)], 1: [TimelineBlock(h)], 2: [TimelineBlock(h)], 3: [TimelineBlock(h)], 
       4: [TimelineBlock(h)], 5: [TimelineBlock(h)], 6: [TimelineBlock(h)], 7: [TimelineBlock(h)], 
       8: [TimelineBlock(h)], 9: [TimelineBlock(h)], 10: [TimelineBlock(h)], 11: [TimelineBlock(h)],
     }),
-    CropData('Assam', 'Cabbage', {
+    CropData('-', 'Cabbage', {
       0: [TimelineBlock(h)], 1: [TimelineBlock(h)]
     }),
-    CropData('Assam', 'Lemon', {
+    CropData('-', 'Lemon', {
        5: [TimelineBlock(h)],6: [TimelineBlock(h)], 7: [TimelineBlock(h)], 8: [TimelineBlock(h)]
     }),
-    CropData('Assam', 'Mango', {
+    CropData('-', 'Mango', {
        5: [TimelineBlock(h)],6: [TimelineBlock(h)], 7: [TimelineBlock(h)]
     }),
-    CropData('Assam', 'Onion', {
+    CropData('-', 'Onion', {
       0: [TimelineBlock(h)], 1: [TimelineBlock(h)], 11: [TimelineBlock(h)]
     }),
-    CropData('Assam', 'Potato', {
+    CropData('-', 'Potato', {
       0: [TimelineBlock(h)], 11: [TimelineBlock(h)]
     }),
-    CropData('Assam', 'Tomato', {
+    CropData('-', 'Tomato', {
       0: [TimelineBlock(h)], 1: [TimelineBlock(h)], 11: [TimelineBlock(h)]
     }),
 
@@ -137,7 +137,7 @@ class CropCalendarScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Crop Calendar'),
+        title: const Text('Crop Calendar Published by Department of Agriculture & Farmers Welfare'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         flexibleSpace: Container(
@@ -209,6 +209,7 @@ class CropCalendarScreen extends StatelessWidget {
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+             _legendItems(const Color(0xFF8CC63F), "ASSAM "),
             _legendItem(const Color(0xFF8CC63F), "Harvest"),
             _legendItem(const Color(0xFF3498DB), "Sowing"),
             const Padding(
@@ -239,64 +240,130 @@ class CropCalendarScreen extends StatelessWidget {
       ],
     );
   }
+    Widget _legendItems(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+     
+      
+        Text(label,
+            style: const TextStyle(
+                color: Colors.black87, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
 
   Widget _buildTimelineTable(double width) {
-    final Map<int, TableColumnWidth> columnWidths = {
-      0: const FlexColumnWidth(1.5), // Season
-      1: const FlexColumnWidth(2.5), // Crop
-    };
-    for (int i = 0; i < 12; i++) {
-      columnWidths[i + 2] = const FlexColumnWidth(1.0); // Months
-    }
+    int totalColumns = 14; // 1 Season, 1 Crop, 12 Months
+    int dividers = totalColumns - 1; // 13 vertical dividers
+    // Subtract 2 for outer left/right borders, and 0.1 for floating-point safety
+    double remainingWidth = width - 2 - dividers - 0.1; 
+    double unit = remainingWidth / 16.0; // 1.5 + 2.5 + 12 = 16
+    
+    double wSeason = unit * 1.5;
+    double wCrop = unit * 2.5;
+    double wMonth = unit * 1.0;
 
-    String lastSeason = "";
-    List<TableRow> rows = [];
-
-    // Header Row
-    rows.add(
-      TableRow(
-        decoration: const BoxDecoration(color: Colors.white),
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Column(
         children: [
-          _headerCell(''),
-          _headerCell(''),
-          ..._months.map((m) => _headerCell(m)),
+          _buildHeaderRow(wSeason, wCrop, wMonth),
+          ..._getSeasons().map((s) => _buildSeasonGroup(s, wSeason, wCrop, wMonth)),
         ],
       ),
     );
+  }
 
-    // Data Rows
-    for (var entry in _detailedData) {
-      bool showSeason = entry.season != lastSeason;
-      lastSeason = entry.season;
+  List<String> _getSeasons() {
+    return _detailedData.map((e) => e.season).toSet().toList();
+  }
 
-      rows.add(
-        TableRow(
-          decoration: const BoxDecoration(color: Colors.white),
-          children: [
-            _textCell(showSeason ? entry.season : "", isBold: showSeason),
-            _textCell(entry.crop),
-            ...List.generate(12, (index) {
-              final blocks = entry.timeline[index] ?? [];
+  Widget _buildHeaderRow(double wSeason, double wCrop, double wMonth) {
+    return Container(
+      height: 45,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
+      ),
+      child: Row(
+        children: [
+          SizedBox(width: wSeason, child: _headerCell('SEASONS')),
+          _vDiv(),
+          SizedBox(width: wCrop, child: _headerCell('CROPS')),
+          ..._months.expand((m) => [_vDiv(), SizedBox(width: wMonth, child: _headerCell(m))]),
+        ],
+      ),
+    );
+  }
+
+  Widget _vDiv({double height = 45}) {
+    return Container(width: 1, height: height, color: Colors.grey.shade300);
+  }
+
+  Widget _buildSeasonGroup(String season, double wSeason, double wCrop, double wMonth) {
+    List<CropData> crops = _detailedData.where((d) => d.season == season).toList();
+    double groupHeight = crops.length * 45.0;
+    bool isLastSeason = season == _getSeasons().last;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: isLastSeason ? null : Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Merged Season Cell
+          SizedBox(
+            width: wSeason,
+            height: groupHeight,
+            child: Center(
+              child: Text(
+                season,
+                style: const TextStyle(color: Colors.black87, fontSize: 12, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          _vDiv(height: groupHeight),
+          // Crops
+          Column(
+            children: crops.asMap().entries.map((entry) {
+              int index = entry.key;
+              CropData crop = entry.value;
+              bool isLastCrop = index == crops.length - 1;
+
               return Container(
                 height: 45,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade200, width: 0.5),
+                  border: isLastCrop ? null : Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
                 ),
-                child: _buildCell(blocks),
+                child: Row(
+                  children: [
+                    SizedBox(width: wCrop, child: _textCell(crop.crop)),
+                    ...List.generate(12, (mIndex) {
+                      final blocks = crop.timeline[mIndex] ?? [];
+                      return Row(
+                        children: [
+                          _vDiv(),
+                          SizedBox(
+                            width: wMonth,
+                            height: 45,
+                            child: _buildCell(blocks),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ],
+                ),
               );
-            }),
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      width: width,
-      child: Table(
-        border: TableBorder.all(color: Colors.grey.shade300, width: 1),
-        columnWidths: columnWidths,
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        children: rows,
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
