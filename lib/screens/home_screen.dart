@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'manual_predict_screen.dart';
 import 'forecast_screen.dart';
 import 'coming_soon_screen.dart';
+import 'crop_calendar_screen.dart';
 import '../widgets/background_wrapper.dart';
 import '../widgets/glass_card.dart';
 
@@ -22,7 +23,7 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Assam Agro Portal",
+                  const Text("Assam Agro Portal v1.0",
                       style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -30,8 +31,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   _navButton(context, "🌱 Predict Crop", const ManualPredictPage()),
                   _navButton(context, "🌤 See Forecast", const ForecastScreen()),
-                  _navButton(context, "📅 See Crop Calendar",
-                      const ComingSoonScreen(title: "Crop Calendar\nComing Soon")),
+                  _navButton(context, "📅 See Crop Calendar", const CropCalendarScreen()),
                 ],
               ),
             ),

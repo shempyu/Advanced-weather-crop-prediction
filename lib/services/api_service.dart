@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _weatherUrl = "http://127.0.0.1:10000/predict-weather";
+  static const String _weatherUrl = "http://127.0.0.1:10000/predict-weather"; //http://127.0.0.1:10000
   static const String _basicCropUrl = "http://127.0.0.1:10000/recommend-basic-crop";
   static const String _advancedCropUrl = "http://127.0.0.1:10000/recommend-advanced-crop";
-  static const String _cropNewsUrl = "http://10.53.3.78:5000/crop-news";
+  static const String _cropNewsUrl = "http://10.53.3.78:5000/crop-news";//http://10.53.3.78:5000
 
   // Weather Prediction
   static Future<Map<String, dynamic>?> fetchWeather({

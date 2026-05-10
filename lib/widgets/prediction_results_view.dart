@@ -14,6 +14,13 @@ class PredictionResultsView extends StatelessWidget {
     if (isLoading) return const Center(child: CircularProgressIndicator(color: Colors.greenAccent));
     if (results.isEmpty) return const SizedBox.shrink();
 
+    final sortedResults = List.from(results);
+    sortedResults.sort((a, b) {
+      double confA = (a["confidence"] ?? 0.0).toDouble();
+      double confB = (b["confidence"] ?? 0.0).toDouble();
+      return confB.compareTo(confA);
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,10 +30,10 @@ class PredictionResultsView extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
         ),
         // Top Card
-        _buildTopCard(context, results[0]),
+        _buildTopCard(context, sortedResults[0]),
         const SizedBox(height: 15),
         // Top 2-5 Suggestions
-        ...results
+        ...sortedResults
             .skip(1)
             .take(4)
             .toList()
@@ -40,7 +47,6 @@ class PredictionResultsView extends StatelessWidget {
   Widget _buildTopCard(BuildContext context, dynamic top) {
     String name = (top["crop"] ?? top["category"] ?? "Unknown").toString().toUpperCase();
     double conf = (top["confidence"] ?? 0.0).toDouble();
-    if (conf <= 1.0 && conf > 0) conf *= 100;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -119,7 +125,6 @@ class PredictionResultsView extends StatelessWidget {
   Widget _buildMinorTile(BuildContext context, dynamic item, int index) {
     String name = (item["crop"] ?? item["category"] ?? "Unknown");
     double conf = (item["confidence"] ?? 0.0).toDouble();
-    if (conf <= 1.0 && conf > 0) conf *= 100;
 
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -165,7 +170,7 @@ class PredictionResultsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "Probability ${conf.toStringAsFixed(1)}%",
+                "Probability ${conf.toStringAsFixed(2)}%",
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 6),
